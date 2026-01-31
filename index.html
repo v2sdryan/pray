@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靈修日記 | Meditation Diary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+            min-height: 100vh;
+            color: #3a3a3a;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 30px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #8b7355 0%, #a08060 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            flex: 0 0 380px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e8e0d5;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.5rem;
+            color: #8b7355;
+        }
+
+        .nav-btn {
+            background: #8b7355;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #6d5a45;
+            transform: scale(1.05);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #8b7355;
+            padding: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9f7f4;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #e8e0d5;
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.active {
+            background: #8b7355;
+            color: white;
+            border-color: #6d5a45;
+        }
+
+        .calendar-day.has-content::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 6px;
+            height: 6px;
+            background: #4ecca3;
+            border-radius: 50%;
+        }
+
+        .calendar-day.active.has-content::after {
+            background: #fff;
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Content Section */
+        .content-section {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .date-display {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e8e0d5;
+        }
+
+        .date-display h2 {
+            font-size: 2rem;
+            color: #8b7355;
+            margin-bottom: 10px;
+        }
+
+        .date-display .lunar-date {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* Media Container */
+        .media-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .image-container {
+            width: 100%;
+            max-height: 60vh;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: #f5f0e8;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        .no-image {
+            color: #999;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Audio Player */
+        .audio-container {
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid #d4c4b0;
+        }
+
+        .audio-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .audio-icon {
+            width: 50px;
+            height: 50px;
+            background: #8b7355;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .audio-info h3 {
+            color: #8b7355;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .audio-info p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        audio {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .no-audio {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Upload Instructions */
+        .upload-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f7f4;
+            border-radius: 8px;
+            border-left: 4px solid #8b7355;
+        }
+
+        .upload-info h4 {
+            color: #8b7355;
+            margin-bottom: 10px;
+        }
+
+        .upload-info code {
+            background: #e8e0d5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        /* Responsive - Tablet */
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+                padding: 15px;
+                gap: 20px;
+            }
+
+            .calendar-section {
+                flex: none;
+                width: 100%;
+                position: static;
+                padding: 20px;
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .image-container {
+                max-height: 50vh;
+                min-height: 150px;
+            }
+
+            .image-container img {
+                max-height: 50vh;
+            }
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 600px) {
+            .header {
+                padding: 20px 0;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+                letter-spacing: 0.1em;
+            }
+
+            .header p {
+                font-size: 0.95rem;
+            }
+
+            .container {
+                padding: 10px;
+                gap: 15px;
+                min-height: auto;
+            }
+
+            .calendar-section {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .calendar-header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+
+            .calendar-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .weekday {
+                padding: 8px 0;
+                font-size: 0.75rem;
+            }
+
+            .calendar-day {
+                border-radius: 6px;
+                min-height: 40px;
+            }
+
+            .day-number {
+                font-size: 0.9rem;
+            }
+
+            .content-section {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .date-display {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
+
+            .date-display h2 {
+                font-size: 1.5rem;
+            }
+
+            .media-container {
+                gap: 20px;
+            }
+
+            .image-container {
+                max-height: 45vh;
+                min-height: 120px;
+                border-radius: 8px;
+            }
+
+            .image-container img {
+                max-height: 45vh;
+            }
+
+            .audio-container {
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            .audio-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .audio-info h3 {
+                font-size: 1rem;
+            }
+
+            .audio-info p {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Responsive - Small Mobile */
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .calendar-grid {
+                gap: 2px;
+            }
+
+            .calendar-day {
+                min-height: 35px;
+            }
+
+            .day-number {
+                font-size: 0.8rem;
+            }
+
+            .weekday {
+                font-size: 0.7rem;
+                padding: 6px 0;
+            }
+
+            .content-section {
+                padding: 12px;
+            }
+
+            .date-display h2 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b7355;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e8e0d5;
+            border-top-color: #8b7355;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>靈修日記</h1>
+        <p>Meditation Diary | Daily Spiritual Reflection</p>
+    </div>
+
+    <div class="container">
+        <!-- Calendar Section -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                <h2 id="currentMonth">2026年 1月</h2>
+                <button class="nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="calendar-grid" id="calendar">
+                <!-- Calendar will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <div class="date-display">
+                <h2 id="selectedDate">2026年1月31日</h2>
+                <p class="lunar-date" id="lunarDate">農曆正月初三</p>
+            </div>
+
+            <div class="media-container">
+                <!-- Image Container -->
+                <div class="image-container" id="imageContainer">
+                    <div class="no-image">
+                        <p>📷 尚無圖片</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">
+                            請上傳 WhatsApp Image 2026-01-31.jpg
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Audio Container -->
+                <div class="audio-container">
+                    <div class="audio-header">
+                        <div class="audio-icon">🎵</div>
+                        <div class="audio-info">
+                            <h3>每日靈修音頻</h3>
+                            <p id="audioDate">2026-01-31</p>
+                        </div>
+                    </div>
+                    <div id="audioPlayer">
+                        <div class="no-audio">
+                            🎤 請上傳 WhatsApp Audio 2026-01-31.mp3
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentDate = new Date(2026, 0, 31); // Start with Jan 31, 2026
+        let selectedDate = new Date(2026, 0, 31);
+        let mediaFiles = []; // Will store available media files
+
+        // File patterns
+        const IMAGE_PATTERN = /WhatsApp Image (\d{4})-(\d{2})-(\d{2})\.jpg/i;
+        const AUDIO_PATTERN = /WhatsApp Audio (\d{4})-(\d{2})-(\d{2})\.mp3/i;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            scanMediaFiles();
+            renderCalendar();
+            updateContent();
+        });
+
+        // Scan for media files (simulated - in real use, you'd list files from server)
+        async function scanMediaFiles() {
+            // In a real scenario, you'd fetch a list of files from the server
+            // For now, we'll simulate checking if files exist
+            mediaFiles = [];
+            
+            // Simulate scanning media/ directory
+            const dates = generateDates();
+            for (const date of dates) {
+                const dateStr = formatDateForFile(date);
+                
+                // Simulate checking if files exist
+                // In real implementation, you'd check actual file existence
+                const hasImage = false; // Will be determined by actual file check
+                const hasAudio = false; // Will be determined by actual file check
+                
+                mediaFiles.push({
+                    date: date,
+                    dateStr: dateStr,
+                    hasImage: hasImage,
+                    hasAudio: hasAudio
+                });
+            }
+            
+            renderCalendar();
+        }
+
+        // Generate dates for scanning
+        function generateDates() {
+            const dates = [];
+            const start = new Date(2026, 0, 1);
+            const end = new Date(2026, 11, 31);
+            
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                dates.push(new Date(d));
+            }
+            return dates;
+        }
+
+        // Format date for filename
+        function formatDateForFile(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Change month
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        // Select date
+        function selectDate(date) {
+            selectedDate = new Date(date);
+            updateContent();
+            renderCalendar();
+        }
+
+        // Update content display
+        function updateContent() {
+            const dateStr = formatDateForFile(selectedDate);
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth() + 1;
+            const day = selectedDate.getDate();
+            
+            // Update date display
+            document.getElementById('selectedDate').textContent = 
+                `${year}年${month}月${day}日`;
+            document.getElementById('lunarDate').textContent = 
+                getLunarDate(selectedDate);
+            document.getElementById('audioDate').textContent = dateStr;
+            
+            // Update image
+            const imageContainer = document.getElementById('imageContainer');
+            const imagePath = `media/WhatsApp Image ${dateStr}.jpg`;
+            
+            // Try to load image
+            const img = new Image();
+            img.onload = () => {
+                imageContainer.innerHTML = `<img src="${imagePath}" alt="靈修圖片 ${dateStr}" onerror="showNoImage()">`;
+            };
+            img.onerror = () => {
+                showNoImage();
+            };
+            img.src = imagePath;
+            
+            // Update audio
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioPath = `media/WhatsApp Audio ${dateStr}.mp3`;
+            
+            // Try to load audio directly (works with local files)
+            const audio = new Audio();
+            audio.preload = 'metadata';
+            
+            audio.onloadedmetadata = () => {
+                // Audio loaded successfully
+                audioPlayer.innerHTML = `
+                    <audio controls style="width: 100%;">
+                        <source src="${audioPath}" type="audio/mpeg">
+                        您的瀏覽器不支援音頻播放。
+                    </audio>
+                `;
+            };
+            
+            audio.onerror = () => {
+                showNoAudio();
+            };
+            
+            // Start loading to check if file exists
+            audio.src = audioPath;
+        }
+
+        function showNoImage() {
+            document.getElementById('imageContainer').innerHTML = `
+                <div class="no-image">
+                    <p>📷 尚無圖片</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">
+                        請上傳 WhatsApp Image ${formatDateForFile(selectedDate)}.jpg
+                    </p>
+                </div>
+            `;
+        }
+
+        function showNoAudio() {
+            document.getElementById('audioPlayer').innerHTML = `
+                <div class="no-audio">
+                    🎤 請上傳 WhatsApp Audio ${formatDateForFile(selectedDate)}.mp3
+                </div>
+            `;
+        }
+
+        // Get lunar date (simplified approximation)
+        function getLunarDate(date) {
+            // This is a simplified placeholder
+            // For accurate lunar dates, you'd need a proper lunar calendar library
+            const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', 
+                                '七月', '八月', '九月', '十月', '冬月', '臘月'];
+            const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                              '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                              '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+            
+            // Approximate calculation (for demonstration)
+            const month = date.getMonth();
+            const day = date.getDate() - 1;
+            return `農曆${lunarMonths[month]}${lunarDays[day] || '初一'}`;
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('currentMonth').textContent = 
+                `${year}年 ${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startPadding = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            // Weekday headers
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekdays.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'weekday';
+                div.textContent = day;
+                calendar.appendChild(div);
+            });
+            
+            // Padding days
+            for (let i = 0; i < startPadding; i++) {
+                const div = document.createElement('div');
+                calendar.appendChild(div);
+            }
+            
+            // Days
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+                div.innerHTML = `<span class="day-number">${day}</span>`;
+                
+                // Check if selected
+                if (date.toDateString() === selectedDate.toDateString()) {
+                    div.classList.add('active');
+                }
+                
+                // Check if has content (would be determined by actual file existence)
+                // For now, we'll simulate marking today
+                if (date.toDateString() === today.toDateString()) {
+                    div.classList.add('has-content');
+                }
+                
+                div.onclick = () => selectDate(date);
+                calendar.appendChild(div);
+            }
+        }
+    </script>
+</body>
+</html>
